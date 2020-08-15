@@ -1,5 +1,6 @@
 const express = require('express')
 const pg = require('pg')
+require('dotenv').config()
 
 const app = express()
 // configs come from standard PostgreSQL env vars
@@ -11,6 +12,47 @@ const queryHandler = (req, res, next) => {
     return res.json(r.rows || [])
   }).catch(next)
 }
+
+// Ideally this should come form a database of some kind
+const apikeys = [
+  "QeThWmZq4t7w!z%C*F-JaNcRfUjXn2r5",
+  "jWmZq4t7w!z%C*F-JaNdRgUkXp2r5u8x"
+];
+
+/**
+ * Middle ware to validate API Key
+ */
+app.use((req, res, next) => {
+
+  const apikey = req.headers["x-api-key"];
+
+  // Verify login and password are set and correct
+  if ( apikeys.indexOf(apikey) > -1 ) {
+    // Access granted
+    return next();
+  }
+
+  // Access denied
+  res.set('WWW-Authenticate', 'Basic realm="401"');
+  res.status(401).send('Authentication required.');
+
+});
+
+/**
+ * Middleware for rate limiting
+ */
+app.use((req, res, next) => {
+
+  const apikey = req.headers["x-api-key"];
+  // Valididate by this point
+  
+  
+
+  // Access denied
+  res.set('WWW-Authenticate', 'Basic realm="4029"');
+  res.status(429).send('Too many requests.');
+
+});
 
 app.get('/', (req, res) => {
   res.send('Welcome to EQ Works 😎')
