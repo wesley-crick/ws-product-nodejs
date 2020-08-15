@@ -1,4 +1,5 @@
 const express = require('express')
+const cors = require('cors');
 const pg = require('pg')
 const { RateLimit } = require('./Objects/RateLimit')
 require('dotenv').config()
@@ -22,6 +23,14 @@ const apikeys = [
   "QeThWmZq4t7w!z%C*F-JaNcRfUjXn2r5",
   "jWmZq4t7w!z%C*F-JaNdRgUkXp2r5u8x"
 ];
+
+/**
+ * Middleware for access control
+ */
+app.use(cors({
+  origin: "http://localhost:4200",
+  credentials: true
+}));
 
 /**
  * Middle ware to validate API Key
