@@ -1,5 +1,6 @@
 const express = require('express')
 const pg = require('pg')
+const { RateLimit } = require('./Objects/RateLimit')
 require('dotenv').config()
 
 const app = express()
@@ -12,6 +13,9 @@ const queryHandler = (req, res, next) => {
     return res.json(r.rows || [])
   }).catch(next)
 }
+
+// A RateLimit[]
+const rateLimitArr = [];
 
 // Ideally this should come form a database of some kind
 const apikeys = [
@@ -26,9 +30,11 @@ app.use((req, res, next) => {
 
   const apikey = req.headers["x-api-key"];
 
-  // Verify login and password are set and correct
-  if ( apikeys.indexOf(apikey) > -1 ) {
+  // Verify API key exists. Ideally it should be done through a DB look up
+  const userId = apikeys.indexOf(apikey);
+  if ( userId > -1 ) {
     // Access granted
+    req.userId = userId;
     return next();
   }
 
@@ -43,13 +49,15 @@ app.use((req, res, next) => {
  */
 app.use((req, res, next) => {
 
-  const apikey = req.headers["x-api-key"];
-  // Valididate by this point
-  
-  
+  const userId = req.userId;
+  let rateLimit = RateLimit.findUser(rateLimitArr, userId);
+
+  if ( rateLimit.isValid() ) {
+    return next();
+  }
 
   // Access denied
-  res.set('WWW-Authenticate', 'Basic realm="4029"');
+  res.set('WWW-Authenticate', 'Basic realm="429"');
   res.status(429).send('Too many requests.');
 
 });
