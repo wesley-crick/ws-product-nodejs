@@ -1,4 +1,4 @@
-const maxCallsPerMin = 10;	// How many times any API endpoints can be hit per minute
+const maxCallsPerMin = 20;	// How many times any API endpoints can be hit per minute
 
 const RateLimit = class RateLimit {
 	
