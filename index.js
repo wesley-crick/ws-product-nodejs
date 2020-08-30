@@ -1,10 +1,15 @@
 const express = require('express')
 const cors = require('cors');
 const pg = require('pg')
+const path = require('path');
 const { RateLimit } = require('./Objects/RateLimit')
 require('dotenv').config()
 
 const app = express()
+
+// Route to the angular app
+app.use('/', express.static(path.join(__dirname, 'public')))
+
 // configs come from standard PostgreSQL env vars
 // https://www.postgresql.org/docs/9.6/static/libpq-envars.html
 const pool = new pg.Pool()
@@ -128,12 +133,12 @@ app.get('/poi', (req, res, next) => {
   return next()
 }, queryHandler)
 
-app.listen(process.env.PORT || 5555, (err) => {
+app.listen(process.env.PORT || 80, "0.0.0.0", (err) => {
   if (err) {
     console.error(err)
     process.exit(1)
   } else {
-    console.log(`Running on ${process.env.PORT || 5555}`)
+    console.log(`Running on ${process.env.PORT || 80}`)
   }
 })
 
